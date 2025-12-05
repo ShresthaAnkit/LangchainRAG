@@ -9,3 +9,6 @@ langchain
 langchain-cohere
 langchain-google-genai
 chromadb
+pymupdf
+docx2txt
+langchain-chroma
