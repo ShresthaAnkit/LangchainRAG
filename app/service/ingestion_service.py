@@ -1,7 +1,7 @@
 from os import sep
 from langchain_community.document_loaders import Docx2txtLoader, PyMuPDFLoader
 from langchain_core.document_loaders import BaseLoader
-from langchain_community.vectorstores import Chroma, VectorStore
+from langchain_community.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from pathlib import Path
@@ -44,7 +44,7 @@ class IngestionService:
             chunk_overlap=50
         )
         for page_number, text in pages:
-            text_chunks = splitter.split_documents(text)
+            text_chunks = splitter.split_text(text)
             for chunk in text_chunks:
                 chunks.append(Document(
                     page_content = chunk,
@@ -58,8 +58,9 @@ class IngestionService:
     def ingest(self, file_paths: list[str], vectorstore: VectorStore):                
         for file_path in file_paths:
             pages = self._load(file_path)
-
-            chunks = self._chunk(pages)
+            filename = Path(file_path).name
+            
+            chunks = self._chunk(pages, source_file = filename)
 
             vectorstore.add_documents(chunks)
 

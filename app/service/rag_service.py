@@ -1,6 +1,3 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_community.vectorstores import Chroma
-
 class RAGService:
     def __init__(self):
         pass
