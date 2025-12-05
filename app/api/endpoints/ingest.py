@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Depends
 from langchain_core.vectorstores import VectorStore
 import tempfile
 import os
-from app.api.deps import get_vectorstore
+from app.api.deps import get_vectorstore_deps
 from app.service.ingestion_service import IngestionService
 from app.schema.api import ApiResponse
 
@@ -12,7 +12,7 @@ router = APIRouter()
 @router.post("/ingest", response_model=ApiResponse)
 async def ingest_documents(
     files: list[UploadFile] = File(...),
-    vectorstore: VectorStore = Depends(get_vectorstore),
+    vectorstore: VectorStore = Depends(get_vectorstore_deps),
 ):
     tmpdir = tempfile.mkdtemp()
     paths = []
