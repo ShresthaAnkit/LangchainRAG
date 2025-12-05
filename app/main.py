@@ -2,8 +2,10 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.core.logging_config import get_logger
 from app.api.api import api_router
+from app.schema.api import ApiResponse
 
 logger = get_logger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,18 +15,21 @@ async def lifespan(app: FastAPI):
 
     logger.info("Shutting down RAG Bot")
 
+
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(api_router, prefix = '/api')
+app.include_router(api_router, prefix="/api")
+
 
 @app.get("/")
 def root():
     return "Welcome to RAG Bot"
 
 
-@app.get("/api/health")
+@app.get("/api/health", response_model=ApiResponse)
 def health_check():
-    return {"status": "ok"}
+    return {"success": True, "message": "Server is healthy"}
+
 
 if __name__ == "__main__":
     import uvicorn
