@@ -1,19 +1,19 @@
 from fastapi import APIRouter, UploadFile, File, Depends
-from fastapi.responses import JSONResponse
 from langchain_core.vectorstores import VectorStore
 import tempfile
 import os
 from app.api.deps import get_vectorstore
 from app.service.ingestion_service import IngestionService
+from app.schema.api import ApiResponse
 
 router = APIRouter()
 
-@router.post("/ingest")
-async def ingest_documents(
-        files: list[UploadFile] = File(...), 
-        vectorstore: VectorStore = Depends(get_vectorstore)
-    ):
 
+@router.post("/ingest", response_model=ApiResponse)
+async def ingest_documents(
+    files: list[UploadFile] = File(...),
+    vectorstore: VectorStore = Depends(get_vectorstore),
+):
     tmpdir = tempfile.mkdtemp()
     paths = []
 
@@ -23,11 +23,10 @@ async def ingest_documents(
 
         with open(dest, "wb") as out_file:
             out_file.write(await file.read())
-        
-        paths.append(dest)
 
+        paths.append(dest)
 
     ingestion_service = IngestionService()
     ingestion_service.ingest(paths, vectorstore)
 
-    return JSONResponse(content="Successfully Ingested Documents")
+    return {"success": True, "message": "Successfully Ingested Documents"}
