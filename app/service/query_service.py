@@ -7,7 +7,10 @@ from langchain_core.output_parsers import StrOutputParser
 
 from app.core.prompt_manager import PromptManager
 from app.schema.query import QueryResponse
+from app.exception import QueryError
+from app.core.logging_config import get_logger
 
+logger = get_logger(__name__)
 
 class QueryService:
     def __init__(self):
@@ -19,25 +22,31 @@ class QueryService:
         llm: BaseChatModel,
         vectorstore: VectorStore,
         prompt_manager: PromptManager,
-    ) -> QueryResponse:
-        TEMPLATE = prompt_manager.get_prompt("query")
+    ) -> QueryResponse:        
+        try:
+            TEMPLATE = prompt_manager.get_prompt("query")
 
-        prompt_template = PromptTemplate.from_template(TEMPLATE)
+            prompt_template = PromptTemplate.from_template(TEMPLATE)
 
-        retriever = vectorstore.as_retriever(
-            search_type="mmr", search_kwargs={"k": 3, "lambda_mult": 0.7, "score_threshold": 0.5}
-        )
-        docs = retriever.invoke(query)
-        context = " ".join([doc.page_content for doc in docs])
-        sources = [doc.model_dump() for doc in docs]
+            retriever = vectorstore.as_retriever(
+                search_type="mmr", search_kwargs={"k": 3, "lambda_mult": 0.7, "score_threshold": 0.5}
+            )
+            docs = retriever.invoke(query)
+            context = " ".join([doc.page_content for doc in docs])
+            sources = [doc.model_dump() for doc in docs]
 
-        chain = (
-            {"context": RunnablePassthrough(), "query": RunnablePassthrough()}
-            | prompt_template
-            | llm
-            | StrOutputParser()
-        )
+            chain = (
+                {"context": RunnablePassthrough(), "query": RunnablePassthrough()}
+                | prompt_template
+                | llm
+                | StrOutputParser()
+            )
 
-        response = chain.invoke({"query": query, "context": context})
+            response = chain.invoke({"query": query, "context": context})
 
-        return QueryResponse(answer=response, sources=sources)
+            return QueryResponse(answer=response, sources=sources)
+        except ValueError as e:
+            raise QueryError(str(e)) from e
+        except Exception as e:
+            logger.exception("Error occurred during query processing")
+            raise QueryError("An error occurred while processing the query.") from e

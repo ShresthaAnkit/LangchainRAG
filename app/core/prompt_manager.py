@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Dict
+from app.core.logging_config import get_logger
 
+logger = get_logger(__name__)
 
 class PromptManager:
     def __init__(self):
@@ -16,6 +18,7 @@ class PromptManager:
 
         prompt_file = self.prompts_dir / f"{name}.txt"
         if not prompt_file.exists():
+            logger.error(f"Prompt '{name}' not found in {self.prompts_dir}")
             raise ValueError(f"Prompt '{name}' not found in {self.prompts_dir}")
 
         with open(prompt_file, "r", encoding="utf-8") as f:
