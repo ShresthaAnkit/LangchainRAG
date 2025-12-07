@@ -1,7 +1,12 @@
 from app.core.db import get_vectorstore
 from app.core.llm import get_llm
+from app.core.prompt_manager import prompt_manager
 from app.schema.llm import EmbeddingProvider, LLMProvider
 from app.schema.db import VectorDB
+
+
+def get_prompt_manager():
+    return prompt_manager
 
 
 def get_vectorstore_deps():
