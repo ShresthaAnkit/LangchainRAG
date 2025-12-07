@@ -22,7 +22,8 @@ class Settings(BaseSettings):
     LLM_MODEL_NAME: str = "gemini-2.5-flash"
     VECTORDB_PERSIST_DIRECTORY: str = "./vectorstore"
 
-    GOOGLE_API_KEY: str
+    GOOGLE_API_KEY: str = ""
+    COHERE_API_KEY: str = ""
 
 
 settings = Settings()

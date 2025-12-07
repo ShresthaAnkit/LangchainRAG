@@ -25,7 +25,7 @@ class QueryService:
         prompt_template = PromptTemplate.from_template(TEMPLATE)
 
         retriever = vectorstore.as_retriever(
-            search_type="mmr", search_kwargs={"k": 3, "lambda_mult": 0.7}
+            search_type="mmr", search_kwargs={"k": 3, "lambda_mult": 0.7, "score_threshold": 0.7}
         )
         docs = retriever.invoke(query)
         context = " ".join([doc.page_content for doc in docs])
