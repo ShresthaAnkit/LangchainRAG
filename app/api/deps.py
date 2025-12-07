@@ -1,4 +1,4 @@
-from app.core.db import get_vectorstore
+from app.core.db import get_vectorstore, get_session_history
 from app.core.llm import get_llm
 from app.core.prompt_manager import prompt_manager
 from app.core.config import settings
@@ -19,3 +19,6 @@ def get_vectorstore_deps():
 
 def get_llm_deps():
     return get_llm(settings.LLM_PROVIDER, model_name=settings.LLM_MODEL_NAME)
+
+def get_session_history_deps(user_id: str):
+    return get_session_history(user_id)

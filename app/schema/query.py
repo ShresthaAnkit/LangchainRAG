@@ -7,3 +7,9 @@ class QueryResponse(BaseModel):
 
 class QueryApiResponse(ApiResponse[QueryResponse]):
     pass
+
+class SessionIDResponse(BaseModel):
+    session_id: str
+
+class SessionApiResponse(ApiResponse[SessionIDResponse]):
+    pass

@@ -1,10 +1,18 @@
+import uuid
+from langchain_community.chat_message_histories import RedisChatMessageHistory
 from app.schema.db import VectorDB
 from app.schema.llm import EmbeddingProvider
 from app.core.logging_config import get_logger
-
 from app.exception import VectorDBError
 
 logger = get_logger(__name__)
+
+
+def get_session_history(session_id: str):
+    """Return memory object for the user."""
+    history = RedisChatMessageHistory(session_id=session_id)
+
+    return history
 
 
 def get_vectorstore(
@@ -34,6 +42,7 @@ def get_vectorstore(
 
         if vector_db == VectorDB.CHROMADB:
             from langchain_chroma import Chroma
+
             vectordb = Chroma(
                 persist_directory=vectordb_persist_directory,
                 embedding_function=embedding_function,
@@ -70,4 +79,6 @@ def get_vectorstore(
         return vectordb
     except Exception as e:
         logger.exception("Error occurred while initializing vector store")
-        raise VectorDBError("An error occurred while initializing the vector store.") from e
+        raise VectorDBError(
+            "An error occurred while initializing the vector store."
+        ) from e
