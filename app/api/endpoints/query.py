@@ -19,10 +19,10 @@ def query(
 ):
     query_service = QueryService()
 
-    response = query_service.query(query, llm, vectorstore, prompt_manager)
+    query_response = query_service.query(query, llm, vectorstore, prompt_manager)
 
     return {
         "success": True,
         "message": "Successful",
-        "data": QueryResponse(answer=response)
+        "data": query_response
     }

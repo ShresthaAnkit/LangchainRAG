@@ -6,6 +6,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 from app.core.prompt_manager import PromptManager
+from app.schema.query import QueryResponse
 
 
 class QueryService:
@@ -18,7 +19,7 @@ class QueryService:
         llm: BaseChatModel,
         vectorstore: VectorStore,
         prompt_manager: PromptManager,
-    ):
+    ) -> QueryResponse:
         TEMPLATE = prompt_manager.get_prompt("query")
 
         prompt_template = PromptTemplate.from_template(TEMPLATE)
@@ -26,14 +27,17 @@ class QueryService:
         retriever = vectorstore.as_retriever(
             search_type="mmr", search_kwargs={"k": 3, "lambda_mult": 0.7}
         )
-        print(retriever.invoke(query))
+        docs = retriever.invoke(query)
+        context = " ".join([doc.page_content for doc in docs])
+        sources = [doc.model_dump() for doc in docs]
+
         chain = (
-            {"context": retriever, "query": RunnablePassthrough()}
+            {"context": RunnablePassthrough(), "query": RunnablePassthrough()}
             | prompt_template
             | llm
             | StrOutputParser()
         )
 
-        response = chain.invoke(query)
+        response = chain.invoke({"query": query, "context": context})
 
-        return response
+        return QueryResponse(answer=response, sources=sources)
