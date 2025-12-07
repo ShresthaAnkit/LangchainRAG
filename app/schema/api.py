@@ -9,7 +9,7 @@ class ApiError(BaseModel):
 
 
 class ApiResponse(Generic[T], BaseModel):
-    success: bool
-    message: str
+    success: bool = True
+    message: str = "Successful"
     data: T | None = None
     errors: ApiError | None = None
