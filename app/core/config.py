@@ -13,8 +13,7 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
 
-    COHERE_API_KEY: str = ""
-    GOOGLE_API_KEY: str = ""
+    GOOGLE_API_KEY: str
 
 
 settings = Settings()

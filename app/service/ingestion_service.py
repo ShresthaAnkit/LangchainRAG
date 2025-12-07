@@ -1,11 +1,16 @@
 from langchain_community.document_loaders import Docx2txtLoader, PyMuPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_google_genai._common import GoogleGenerativeAIError
 from langchain_core.document_loaders import BaseLoader
 from langchain_community.vectorstores import VectorStore
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from pathlib import Path
 from typing import Type
 
+from app.exception import IngestionError
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 class IngestionService:
     SUPPORTED_LOADERS: dict[str, Type[BaseLoader]] = {
@@ -21,7 +26,8 @@ class IngestionService:
         file_ext = Path(file_path).suffix.lower()
 
         if file_ext not in self.SUPPORTED_LOADERS:
-            raise ValueError(f"Unsupported file type: {file_ext}")
+            logger.error(f"Unsupported file type attempted: {file_ext}")
+            raise IngestionError(f"Unsupported file type: {file_ext}")
 
         loader_class = self.SUPPORTED_LOADERS[file_ext]
         loader = loader_class(file_path)
@@ -59,4 +65,11 @@ class IngestionService:
 
             chunks = self._chunk(pages, source_file=filename)
 
-            vectorstore.add_documents(chunks)
+            try:
+                vectorstore.add_documents(chunks)
+            except GoogleGenerativeAIError as e:
+                logger.exception("Google GenAI embedding failed during ingestion")
+                raise IngestionError("Please check your Google Generative AI API key.") from e
+            except Exception as e:
+                logger.exception("Unexpected ingestion error")
+                raise IngestionError("Failed to add documents to vectorstore.") from e

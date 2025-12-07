@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from app.core.logging_config import get_logger
 from app.api.api import api_router
 from app.schema.api import ApiResponse
+from app.exception_handler import register_exception_handlers
 
 logger = get_logger(__name__)
 
@@ -20,6 +21,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(api_router, prefix="/api")
 
+register_exception_handlers(app)
 
 @app.get("/")
 def root():
