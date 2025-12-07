@@ -1,13 +1,9 @@
-from httpx import get
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_chroma import Chroma
-from langchain_qdrant import QdrantVectorStore
-from qdrant_client import QdrantClient
 from app.schema.db import VectorDB
 from app.schema.llm import EmbeddingProvider
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
+
 
 def get_vectorstore(
     vector_db: VectorDB,
@@ -15,24 +11,34 @@ def get_vectorstore(
     model_name: str,
     persist_directory: str,
 ):
-
     if embedding_provider == EmbeddingProvider.GOOGLE:
+        from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
         embedding_function = GoogleGenerativeAIEmbeddings(
+            model=model_name,
+        )
+    elif embedding_provider == EmbeddingProvider.COHERE:
+        from langchain_cohere import CohereEmbeddings
+
+        embedding_function = CohereEmbeddings(
             model=model_name,
         )
     else:
         logger.error(f"Embedding provider {embedding_provider} not supported")
         raise NotImplementedError()
 
-    vectordb_persist_directory = f"{persist_directory}-{vector_db.value}"    
+    vectordb_persist_directory = f"{persist_directory}-{vector_db.value}"
 
     if vector_db == VectorDB.CHROMADB:
-
+        from langchain_chroma import Chroma
         vectordb = Chroma(
             persist_directory=vectordb_persist_directory,
             embedding_function=embedding_function,
         )
     elif vector_db == VectorDB.QDRANT:
+        from langchain_qdrant import QdrantVectorStore
+        from qdrant_client import QdrantClient
+        
         client = QdrantClient(path=vectordb_persist_directory)
 
         collection_name = f"collection-{embedding_provider.value}-{model_name}"
