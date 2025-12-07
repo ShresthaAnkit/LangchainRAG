@@ -1,6 +1,8 @@
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 from dotenv import load_dotenv
+from app.schema.llm import EmbeddingProvider, LLMProvider
+from app.schema.db import VectorDB
 
 load_dotenv()
 
@@ -12,6 +14,13 @@ class Settings(BaseSettings):
     )
 
     LOG_LEVEL: str = "INFO"
+
+    VECTOR_DB: VectorDB = VectorDB.CHROMADB
+    LLM_PROVIDER: LLMProvider = LLMProvider.GOOGLE
+    EMBEDDING_PROVIDER: EmbeddingProvider = EmbeddingProvider.GOOGLE
+    EMBEDDING_MODEL_NAME: str = "gemini-embedding-001"
+    LLM_MODEL_NAME: str = "gemini-2.5-flash"
+    VECTORDB_PERSIST_DIRECTORY: str = "./vectorstore"
 
     GOOGLE_API_KEY: str
 
