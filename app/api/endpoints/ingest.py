@@ -1,3 +1,4 @@
+import shutil
 from fastapi import APIRouter, UploadFile, File, Depends
 from langchain_core.vectorstores import VectorStore
 import tempfile
@@ -16,17 +17,19 @@ async def ingest_documents(
 ):
     tmpdir = tempfile.mkdtemp()
     paths = []
+    try:
+        for file in files:
+            filename = file.filename
+            dest = os.path.join(tmpdir, filename)
 
-    for file in files:
-        filename = file.filename
-        dest = os.path.join(tmpdir, filename)
+            with open(dest, "wb") as out_file:
+                out_file.write(await file.read())
 
-        with open(dest, "wb") as out_file:
-            out_file.write(await file.read())
+            paths.append(dest)
 
-        paths.append(dest)
-
-    ingestion_service = IngestionService()
-    ingestion_service.ingest(paths, vectorstore)
+        ingestion_service = IngestionService()
+        ingestion_service.ingest(paths, vectorstore)
+    finally:
+        shutil.rmtree(tmpdir)
 
     return {"success": True, "message": "Successfully Ingested Documents"}
