@@ -1,5 +1,4 @@
 # app/exception_handlers.py
-from re import A
 from fastapi import Request, FastAPI, status
 from fastapi.responses import JSONResponse
 from app.exception import IngestionError, QueryError, VectorDBError, LLMProviderError
@@ -19,9 +18,16 @@ def register_exception_handlers(app: FastAPI):
                 logger.warning(
                     f"Client Error {status_code} ({type(exc).__name__}): {str(exc)}"
                 )
-            return JSONResponse(status_code=status_code, content={
-                **ApiResponse(success=False, message="Failed to process request", error=str(exc)).model_dump()
-            })
+            return JSONResponse(
+                status_code=status_code,
+                content={
+                    **ApiResponse(
+                        success=False,
+                        message="Failed to process request",
+                        error=str(exc),
+                    ).model_dump()
+                },
+            )
 
         return handler
 
