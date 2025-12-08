@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     LLM_MODEL_NAME: str = "gemini-2.5-flash"
     VECTORDB_PERSIST_DIRECTORY: str = "./vectorstore"
     VECTORDB_PERSIST_URL: str = "http://localhost:6333"
+    REDIS_URL: str = "redis://localhost:6379"
 
     GOOGLE_API_KEY: str = ""
     COHERE_API_KEY: str = ""

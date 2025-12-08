@@ -3,13 +3,14 @@ from app.schema.db import VectorDB
 from app.schema.llm import EmbeddingProvider
 from app.core.logging_config import get_logger
 from app.exception import VectorDBError
+from app.core.config import settings
 
 logger = get_logger(__name__)
 
 
 def get_session_history(session_id: str):
     """Return memory object for the user."""
-    history = RedisChatMessageHistory(session_id=session_id)
+    history = RedisChatMessageHistory(session_id=session_id, url=settings.REDIS_URL)
 
     return history
 
