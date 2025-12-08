@@ -46,8 +46,16 @@ class QueryService:
                 search_kwargs={"k": 3, "lambda_mult": 0.7, "score_threshold": 0.5},
             )
             docs = retriever.invoke(query)
-            context = " ".join([doc.page_content for doc in docs])
-            sources = [doc.model_dump() for doc in docs]
+            
+            formatted_docs = []
+
+            for i, doc in enumerate(docs):
+                formatted_docs.append(f"Source ID: [{i+1}]\nContent: {doc.page_content}")
+            
+            context = "\n\n".join(formatted_docs)
+
+
+            sources = [{"source_id": i+1,**doc.model_dump()} for i, doc in enumerate(docs)]
 
             chain = (
                 {
