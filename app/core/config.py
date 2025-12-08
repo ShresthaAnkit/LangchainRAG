@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL_NAME: str = "gemini-embedding-001"
     LLM_MODEL_NAME: str = "gemini-2.5-flash"
     VECTORDB_PERSIST_DIRECTORY: str = "./vectorstore"
+    VECTORDB_PERSIST_URL: str = "http://localhost:6333"
 
     GOOGLE_API_KEY: str = ""
     COHERE_API_KEY: str = ""

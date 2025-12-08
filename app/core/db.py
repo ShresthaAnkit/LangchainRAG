@@ -1,4 +1,3 @@
-import uuid
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from app.schema.db import VectorDB
 from app.schema.llm import EmbeddingProvider
@@ -19,7 +18,8 @@ def get_vectorstore(
     vector_db: VectorDB,
     embedding_provider: EmbeddingProvider,
     model_name: str,
-    persist_directory: str,
+    persist_directory: str = None,
+    persist_url: str = None,
 ):
     try:
         if embedding_provider == EmbeddingProvider.GOOGLE:
@@ -51,7 +51,7 @@ def get_vectorstore(
             from langchain_qdrant import QdrantVectorStore
             from qdrant_client import QdrantClient
 
-            client = QdrantClient(path=vectordb_persist_directory)
+            client = QdrantClient(url=persist_url)
 
             collection_name = f"collection-{embedding_provider.value}-{model_name}"
             collections = client.get_collections().collections
