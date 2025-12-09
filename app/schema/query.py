@@ -13,3 +13,7 @@ class SessionIDResponse(BaseModel):
 
 class SessionApiResponse(ApiResponse[SessionIDResponse]):
     pass
+
+class ChatRequest(BaseModel):
+    session_id: str
+    query: str
