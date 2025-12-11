@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.core.logging_config import get_logger
+from app.core.logging_config import get_logger, setup_logging
 from app.api.api import api_router
 from app.schema.api import ApiResponse
 from app.exception_handler import register_exception_handlers
 
+setup_logging()
 logger = get_logger(__name__)
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

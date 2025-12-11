@@ -17,3 +17,10 @@ class SessionApiResponse(ApiResponse[SessionIDResponse]):
 class ChatRequest(BaseModel):
     session_id: str
     query: str
+
+class CollectionsList(BaseModel):
+    collections: list
+
+class ListCollectionResponse(ApiResponse[CollectionsList]):
+    pass
+    
