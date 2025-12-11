@@ -1,6 +1,7 @@
 # app/exception_handlers.py
 from fastapi import Request, FastAPI, status
 from fastapi.responses import JSONResponse
+from app.exception.collection import CollectionAlreadyExistsError
 from app.exception import IngestionError, QueryError, VectorDBError, LLMProviderError
 from app.core.logging_config import get_logger
 from app.schema.api import ApiResponse
@@ -38,6 +39,7 @@ def register_exception_handlers(app: FastAPI):
         QueryError: status.HTTP_400_BAD_REQUEST,
         LLMProviderError: status.HTTP_500_INTERNAL_SERVER_ERROR,
         VectorDBError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+        CollectionAlreadyExistsError: status.HTTP_400_BAD_REQUEST,
     }
 
     # Register them in a loop

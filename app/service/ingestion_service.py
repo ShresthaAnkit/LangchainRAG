@@ -46,9 +46,8 @@ class IngestionService:
             return [(1, text)]
 
     def _chunk(self, pages: list[tuple[int, str]], source_file: str) -> list[Document]:
-
         full_text = ""
-        page_boundaries = [] # Store (char_index, page_number)
+        page_boundaries = []  # Store (char_index, page_number)
 
         current_char_index = 0
         for page_number, page_text in pages:
@@ -59,26 +58,29 @@ class IngestionService:
             current_char_index += len(page_text)
 
         splitter = RecursiveCharacterTextSplitter(
-            separators=["\n\n\n", "\n\n", ".", " "], chunk_size=1000, chunk_overlap=50
+            separators=["\n\n\n", "\n\n", ".", " "],
+            chunk_size=1000,
+            chunk_overlap=50,
+            add_start_index=True,
         )
-        
+
         chunks = splitter.create_documents([full_text])
 
         final_chunks = []
 
         for chunk in chunks:
             start_index = chunk.metadata["start_index"]
-        
+
             page_index = bisect.bisect_right(page_boundaries, start_index) - 1
-            
+
             # Get the actual page number from document
             original_page_number = pages[page_index][0]
-            
+
             chunk.metadata["source"] = source_file
             chunk.metadata["page"] = original_page_number
 
             final_chunks.append(chunk)
-        
+
         return final_chunks
 
     def ingest(self, file_paths: list[str], vectorstore: VectorStore):

@@ -3,7 +3,6 @@ from fastapi import APIRouter, UploadFile, File, Depends
 from langchain_core.vectorstores import VectorStore
 import tempfile
 import os
-from app.schema.query import ListCollectionResponse
 from app.api.deps import get_vectorstore_deps
 from app.service.ingestion_service import IngestionService
 from app.schema.api import ApiResponse
@@ -14,7 +13,7 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 
-@router.post("/ingest", response_model=ApiResponse)
+@router.post("/{collection_name}/ingest", response_model=ApiResponse)
 async def ingest_documents(
     files: list[UploadFile] = File(...),
     vectorstore: VectorStore = Depends(get_vectorstore_deps),
@@ -37,33 +36,3 @@ async def ingest_documents(
         shutil.rmtree(tmpdir)
 
     return {"success": True, "message": "Successfully Ingested Documents"}
-
-
-@router.get("/list-collections", response_model=ListCollectionResponse)
-def list_collections(vectorstore: VectorStore = Depends(get_vectorstore_deps)):
-    try:
-        return {
-            "data": {"collections": vectorstore.client.get_collections().collections}
-        }
-    except Exception as e:
-        logger.error(
-            f"List collection is not supported by the current vectorstore: {e}"
-        )
-        return []
-
-
-@router.delete("/delete-collection/{collection_name}", response_model=ApiResponse)
-def delete_collection(
-    collection_name: str, vectorstore: VectorStore = Depends(get_vectorstore_deps)
-):
-    try:
-        deleted: bool = vectorstore.client.delete_collection(collection_name)
-        if deleted:
-            return {"messages": "Successfully Deleted Collection"}
-        else:
-            logger.error("Failed to delete collection.")
-    except Exception as e:
-        logger.error(
-            f"Delete collection is not supported by the current vectorstore: {e}"
-        )
-    return {"success": False, "message": "Failed to Delete Collection"}

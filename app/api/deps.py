@@ -8,10 +8,11 @@ def get_prompt_manager_deps():
     return prompt_manager
 
 
-def get_vectorstore_deps():
+def get_vectorstore_deps(collection_name: str):
     return get_vectorstore(
         vector_db=settings.VECTOR_DB,
         embedding_provider=settings.EMBEDDING_PROVIDER,
+        collection_name=collection_name,
         model_name=settings.EMBEDDING_MODEL_NAME,
         persist_directory=settings.VECTORDB_PERSIST_DIRECTORY,
         persist_url=settings.VECTORDB_PERSIST_URL,
