@@ -40,13 +40,13 @@ class QueryService:
             prompt_template = ChatPromptTemplate.from_messages(
                 [
                     ("system", TEMPLATE_SYSTEM),
-                    MessagesPlaceholder(variable_name="chat_history"),
+                    MessagesPlaceholder(variable_name="chat_history"),  
                     HumanMessagePromptTemplate.from_template(TEMPLATE_HUMAN),
                 ]
             )
             retriever = vectorstore.as_retriever(
-                search_type="mmr",
-                search_kwargs={"k": 3, "lambda_mult": 0.7, "score_threshold": 0.5},
+                search_type="similarity",
+                search_kwargs={"k": 5, "score_threshold": 0.5},
             )
             docs = retriever.invoke(query, config={"callbacks": [langfuse_handler]})
 
