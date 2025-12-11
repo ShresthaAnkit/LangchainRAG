@@ -7,6 +7,8 @@ from langchain_core.prompts import (
 )
 from langchain_core.runnables import RunnableWithMessageHistory
 from langchain_core.output_parsers import StrOutputParser
+from langfuse.langchain import CallbackHandler
+from langfuse import observe
 from operator import itemgetter
 from app.core.prompt_manager import PromptManager
 from app.schema.query import QueryResponse
@@ -20,7 +22,7 @@ logger = get_logger(__name__)
 class QueryService:
     def __init__(self):
         pass
-
+    @observe()
     def query(
         self,
         query: str,
@@ -30,6 +32,8 @@ class QueryService:
         prompt_manager: PromptManager,
     ) -> QueryResponse:
         try:
+            langfuse_handler = CallbackHandler()
+
             TEMPLATE_SYSTEM = prompt_manager.get_prompt("query_system")
             TEMPLATE_HUMAN = prompt_manager.get_prompt("query")
 
@@ -44,7 +48,7 @@ class QueryService:
                 search_type="mmr",
                 search_kwargs={"k": 3, "lambda_mult": 0.7, "score_threshold": 0.5},
             )
-            docs = retriever.invoke(query)
+            docs = retriever.invoke(query, config={"callbacks": [langfuse_handler]})
 
             formatted_docs = []
 
@@ -79,7 +83,10 @@ class QueryService:
 
             response = chain_with_history.invoke(
                 {"query": query, "context": context},
-                config={"configurable": {"session_id": session_id}},
+                config={
+                    "configurable": {"session_id": session_id},
+                    "callbacks": [langfuse_handler],
+                },
             )
 
             return QueryResponse(answer=response, sources=sources)

@@ -14,5 +14,6 @@ pymupdf
 docx2txt
 langchain-chroma
 langchain-qdrant
+langchain-docling
 redis
 qdrant-client

@@ -1,4 +1,5 @@
-from langchain_community.document_loaders import Docx2txtLoader, PyMuPDFLoader
+from langchain_community.document_loaders import Docx2txtLoader
+from langchain_docling import DoclingLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai._common import GoogleGenerativeAIError
 from langchain_core.document_loaders import BaseLoader
@@ -12,9 +13,10 @@ from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+
 class IngestionService:
     SUPPORTED_LOADERS: dict[str, Type[BaseLoader]] = {
-        ".pdf": PyMuPDFLoader,
+        ".pdf": DoclingLoader,
         ".docx": Docx2txtLoader,
     }
 
@@ -69,7 +71,9 @@ class IngestionService:
                 vectorstore.add_documents(chunks)
             except GoogleGenerativeAIError as e:
                 logger.exception("Google GenAI embedding failed during ingestion")
-                raise IngestionError("Please check your Google Generative AI API key.") from e
+                raise IngestionError(
+                    "Please check your Google Generative AI API key."
+                ) from e
             except Exception as e:
                 logger.exception("Unexpected ingestion error")
                 raise IngestionError("Failed to add documents to vectorstore.") from e

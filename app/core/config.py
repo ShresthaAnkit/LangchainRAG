@@ -30,6 +30,6 @@ class Settings(BaseSettings):
     LANGFUSE_SECRET_KEY: str = ""
     LANGFUSE_PUBLIC_KEY: str = ""
     LANGFUSE_BASE_URL: str = ""
-
+    LANGFUSE_TIMEOUT: int = 5
 
 settings = Settings()
