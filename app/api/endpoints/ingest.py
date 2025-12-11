@@ -6,6 +6,9 @@ import os
 from app.api.deps import get_vectorstore_deps
 from app.service.ingestion_service import IngestionService
 from app.schema.api import ApiResponse
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -33,3 +36,13 @@ async def ingest_documents(
         shutil.rmtree(tmpdir)
 
     return {"success": True, "message": "Successfully Ingested Documents"}
+
+@router.get("/list-collections")
+def list_collections(vectorstore: VectorStore = Depends(get_vectorstore_deps)):
+    try:
+        return vectorstore.client.get_collections().collections
+    except Exception as e:
+        logger.error(
+            f"List collection is not supported by the current vectorstore: {e}"
+        )
+        return []
