@@ -17,3 +17,4 @@ langchain-qdrant
 langchain-docling
 redis
 qdrant-client
+langfuse
