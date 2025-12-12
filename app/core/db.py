@@ -118,3 +118,7 @@ def list_collection_qdrant() -> list:
     for collection in collections:
         collections_list.append(collection.name)
     return collections_list
+
+def delete_collection_qdrant(collection_name: str) -> bool:
+    client = QdrantClient(url=settings.VECTORDB_PERSIST_URL)
+    return client.delete_collection(collection_name)

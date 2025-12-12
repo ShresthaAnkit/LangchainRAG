@@ -45,8 +45,11 @@ class QueryService:
         sources = [
             {
                 "source_id": i + 1,
-                "url": doc.get("url", ""),
-                "title": doc.get("title", ""),
+                "metadata": {
+                    "source": doc.get("url", ""),
+                    "title": doc.get("title", ""),
+                },
+                "type": "websearch"
             }
             for i, doc in enumerate(web_docs.get("results", []))
         ]
@@ -104,21 +107,12 @@ class QueryService:
                 vectorstore=vectorstore,
                 langfuse_handler=langfuse_handler,
             )
-            if not sources:
-                logger.info("No sources found through vector search")
-                context, sources = self._web_search(
-                    query=query,
-                    langfuse_handler=langfuse_handler,
-                )
-                context_source = "web"
-            else:
-                context_source = "vectorstore"
 
             response = self._process_query(
                 query, context, session_id, llm, langfuse_handler, prompt_template
             )
 
-            if not response.found_answer and context_source == "vectorstore":
+            if not response.found_answer:
                 logger.info(
                     "Answer not found in vectorstore continuing with web search"
                 )

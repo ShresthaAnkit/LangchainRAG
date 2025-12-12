@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends
-from langchain_core.vectorstores import VectorStore
+from fastapi import APIRouter
 from app.schema.collection import ListCollectionResponse
-from app.api.deps import get_vectorstore_deps
 from app.schema.api import ApiResponse
 from app.core.logging_config import get_logger
-from app.core.db import create_collection_qdrant, list_collection_qdrant
+from app.core.db import (
+    create_collection_qdrant,
+    delete_collection_qdrant,
+    list_collection_qdrant,
+)
 
 logger = get_logger(__name__)
 
@@ -19,7 +21,7 @@ def create_collection_(collection_name: str):
         return {"message": "Successfully created collection"}
 
 
-@router.get("/", response_model=ListCollectionResponse)
+@router.get("", response_model=ListCollectionResponse)
 def list_collections():
     try:
         return {"data": {"collections": list_collection_qdrant()}}
@@ -31,11 +33,9 @@ def list_collections():
 
 
 @router.delete("/{collection_name}", response_model=ApiResponse)
-def delete_collection(
-    collection_name: str, vectorstore: VectorStore = Depends(get_vectorstore_deps)
-):
+def delete_collection(collection_name: str):
     try:
-        deleted: bool = vectorstore.client.delete_collection(collection_name)
+        deleted: bool = delete_collection_qdrant(collection_name)
         if deleted:
             return {"messages": "Successfully Deleted Collection"}
         else:
