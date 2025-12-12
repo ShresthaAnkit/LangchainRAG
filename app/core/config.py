@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
 
-    VECTOR_DB: VectorDB = VectorDB.CHROMADB
+    VECTOR_DB: VectorDB = VectorDB.QDRANT
     VECTORDB_PERSIST_DIRECTORY: str = "./vectorstore"
     VECTORDB_PERSIST_URL: str = "http://localhost:6333"
 
