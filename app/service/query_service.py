@@ -6,6 +6,7 @@ from langchain_core.prompts import (
     MessagesPlaceholder,
 )
 from langchain_core.runnables import RunnableWithMessageHistory
+from langchain_tavily import TavilySearch
 from langfuse.langchain import CallbackHandler
 from langfuse import observe
 from operator import itemgetter
@@ -15,7 +16,7 @@ from app.schema.query import QueryResponse, RAGResponse
 from app.exception import QueryError
 from app.core.logging_config import get_logger
 from app.core.db import get_session_history
-from langchain_tavily import TavilySearch
+from app.core.config import settings
 
 logger = get_logger(__name__)
 
@@ -30,7 +31,7 @@ class QueryService:
         langfuse_handler: CallbackHandler,
     ) -> tuple[str, list[dict]]:
         logger.info("Performing Web Search")
-        tavily_retriever = TavilySearch(k=5)
+        tavily_retriever = TavilySearch(k=settings.WEB_SEARCH_TOP_K)
         web_docs = tavily_retriever.invoke(
             query, config={"callbacks": [langfuse_handler], "verbose": False}
         )
@@ -57,7 +58,10 @@ class QueryService:
         logger.info("Performing Vector Search")
         retriever = vectorstore.as_retriever(
             search_type="similarity",
-            search_kwargs={"k": 5, "score_threshold": 0.3},
+            search_kwargs={
+                "k": settings.VECTOR_SEARCH_TOP_K,
+                "score_threshold": settings.VECTOR_SEARCH_SIMILARITY_THRESHOLD,
+            },
         )
         docs = retriever.invoke(query, config={"callbacks": [langfuse_handler]})
         formatted_docs = []

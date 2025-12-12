@@ -12,6 +12,7 @@ from typing import Type
 import bisect
 
 from app.exception import IngestionError
+from app.core.config import settings
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -63,8 +64,8 @@ class IngestionService:
 
         splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n\n", "\n\n", ".", " "],
-            chunk_size=1000,
-            chunk_overlap=50,
+            chunk_size=settings.CHUNK_SIZE,
+            chunk_overlap=settings.CHUNK_OVERLAP,
             add_start_index=True,
         )
 
@@ -112,7 +113,7 @@ class IngestionService:
         try:
             langfuse_handler = CallbackHandler()
             
-            tavily_retriever = TavilyExtract(k=5)
+            tavily_retriever = TavilyExtract(k=settings.WEB_SEARCH_TOP_K)
             
             responses = tavily_retriever.invoke({"urls": urls}, config={"callbacks": [langfuse_handler]})
             

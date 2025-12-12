@@ -15,9 +15,15 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
 
+    CHUNK_SIZE: int = 1000
+    CHUNK_OVERLAP: int = 50
+
     VECTOR_DB: VectorDB = VectorDB.QDRANT
     VECTORDB_PERSIST_DIRECTORY: str = "./vectorstore"
     VECTORDB_PERSIST_URL: str = "http://localhost:6333"
+
+    VECTOR_SEARCH_SIMILARITY_THRESHOLD: float = 0.3
+    VECTOR_SEARCH_TOP_K: int = 5
 
     EMBEDDING_PROVIDER: EmbeddingProvider = EmbeddingProvider.GOOGLE
     EMBEDDING_MODEL_NAME: str = "gemini-embedding-001"
@@ -26,6 +32,7 @@ class Settings(BaseSettings):
     LLM_MODEL_NAME: str = "gemini-2.5-flash"
 
     TAVILY_API_KEY: str = ""
+    WEB_SEARCH_TOP_K: int = 5
     
     REDIS_URL: str = "redis://localhost:6379"
 
