@@ -1,11 +1,12 @@
 from langchain_community.chat_message_histories import RedisChatMessageHistory
+from qdrant_client import QdrantClient
+import boto3
 from app.exception.collection import CollectionAlreadyExistsError
 from app.schema.db import VectorDB
 from app.schema.llm import EmbeddingProvider
 from app.core.logging_config import get_logger
 from app.exception import VectorDBError
 from app.core.config import settings
-from qdrant_client import QdrantClient
 
 logger = get_logger(__name__)
 
@@ -30,6 +31,17 @@ def _get_embedding_function(embedding_provider: EmbeddingProvider, model_name: s
         embedding_function = CohereEmbeddings(
             model=model_name,
         )
+    elif embedding_provider == EmbeddingProvider.BEDROCK:
+        from langchain_aws import BedrockEmbeddings
+        bedrock_runtime = boto3.client(
+            service_name="bedrock-runtime",
+            region_name=settings.REGION_NAME
+        )
+
+        embedding_function = BedrockEmbeddings(
+            client=bedrock_runtime,
+            model_id=model_name
+        )
     else:
         logger.error(f"Embedding provider {embedding_provider} not supported")
         raise VectorDBError(f"Unsupported embedding provider: {embedding_provider}")
@@ -49,16 +61,9 @@ def get_vectorstore(
             embedding_provider=embedding_provider, model_name=model_name
         )
 
-        vectordb_persist_directory = f"{persist_directory}-{vector_db.value}"
+        # vectordb_persist_directory = f"{persist_directory}-{vector_db.value}"
 
-        if vector_db == VectorDB.CHROMADB:
-            from langchain_chroma import Chroma
-
-            vectordb = Chroma(
-                persist_directory=vectordb_persist_directory,
-                embedding_function=embedding_function,
-            )
-        elif vector_db == VectorDB.QDRANT:
+        if vector_db == VectorDB.QDRANT:
             from langchain_qdrant import QdrantVectorStore
             from qdrant_client import QdrantClient
 

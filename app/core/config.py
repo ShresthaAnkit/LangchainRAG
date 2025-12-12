@@ -37,4 +37,9 @@ class Settings(BaseSettings):
     LANGFUSE_BASE_URL: str = ""
     LANGFUSE_TIMEOUT: int = 5
 
+    AWS_ACCESS_KEY_ID: str = ""
+    AWS_SECRET_ACCESS_KEY: str = ""
+    AWS_SESSION_TOKEN: str = ""
+    REGION_NAME: str = ""
+
 settings = Settings()
