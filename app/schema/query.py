@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.schema.api import ApiResponse
 
 class QueryResponse(BaseModel):
@@ -24,3 +24,11 @@ class CollectionsList(BaseModel):
 class ListCollectionResponse(ApiResponse[CollectionsList]):
     pass
     
+class GradeDocuments(BaseModel):
+    """Boolean for relevance check on retrieved documents."""
+    relevant: bool = Field(description="Documents are relevant to the query, true or false")
+
+class RAGResponse(BaseModel):
+    """Response validation object."""
+    answer: str = Field(description="The answer to the user's question based on the context.")
+    found_answer: bool = Field(description="True if the provided context contains the information to answer the question, False if the context is irrelevant or missing the answer.")

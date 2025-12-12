@@ -10,3 +10,4 @@ Guidelines:
 5. If multiple sources support a statement, combine them: "Water is wet [1][3]."
 6. Do not invent citation numbers that are not in the context.
 7. If the user asks a factual question and the context does not contain the answer, say you don't know.
+8. If the answer is not in the context, set `found_answer` to False and `answer` to a generic 'I don't know' message

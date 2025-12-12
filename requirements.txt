@@ -18,3 +18,5 @@ langchain-docling
 redis
 qdrant-client
 langfuse
+tavily-python
+langchain_tavily

@@ -5,6 +5,8 @@ from langchain_google_genai._common import GoogleGenerativeAIError
 from langchain_core.document_loaders import BaseLoader
 from langchain_community.vectorstores import VectorStore
 from langchain_core.documents import Document
+from langchain_tavily import TavilyExtract
+from langfuse.langchain import CallbackHandler
 from pathlib import Path
 from typing import Type
 import bisect
@@ -26,6 +28,7 @@ class IngestionService:
 
     def _load(self, file_path: str) -> list[tuple[int, str]]:
         """Take a file_path and extract pages from the document"""
+        logger.info("Loading text from files")
         file_ext = Path(file_path).suffix.lower()
 
         if file_ext not in self.SUPPORTED_LOADERS:
@@ -45,7 +48,8 @@ class IngestionService:
             text = loader.load()[0].page_content
             return [(1, text)]
 
-    def _chunk(self, pages: list[tuple[int, str]], source_file: str) -> list[Document]:
+    def _chunk(self, pages: list[tuple[int, str]], source: str) -> list[Document]:
+        logger.info("Chunking text")
         full_text = ""
         page_boundaries = []  # Store (char_index, page_number)
 
@@ -76,21 +80,23 @@ class IngestionService:
             # Get the actual page number from document
             original_page_number = pages[page_index][0]
 
-            chunk.metadata["source"] = source_file
+            chunk.metadata["source"] = source
             chunk.metadata["page"] = original_page_number
 
             final_chunks.append(chunk)
 
         return final_chunks
 
-    def ingest(self, file_paths: list[str], vectorstore: VectorStore):
+    def ingest_documents(self, file_paths: list[str], vectorstore: VectorStore):
+
         for file_path in file_paths:
             pages = self._load(file_path)
             filename = Path(file_path).name
 
-            chunks = self._chunk(pages, source_file=filename)
+            chunks = self._chunk(pages, source=filename)
 
             try:
+                logger.info("Adding documents to vectorstore")
                 vectorstore.add_documents(chunks)
             except GoogleGenerativeAIError as e:
                 logger.exception("Google GenAI embedding failed during ingestion")
@@ -98,5 +104,30 @@ class IngestionService:
                     "Please check your Google Generative AI API key."
                 ) from e
             except Exception as e:
-                logger.exception("Unexpected ingestion error")
+                logger.exception("Unexpected ingestion error while ingesting documents.")
                 raise IngestionError("Failed to add documents to vectorstore.") from e
+
+    def ingest_urls(self, urls: list[str], vectorstore: VectorStore):
+        
+        try:
+            langfuse_handler = CallbackHandler()
+            
+            tavily_retriever = TavilyExtract(k=5)
+            
+            responses = tavily_retriever.invoke({"urls": urls}, config={"callbacks": [langfuse_handler]})
+            
+            for response in responses.get("results", []):
+                url = response.get("url", "")
+                content = response.get("raw_content", "")
+                chunks = self._chunk(pages= [(1, content)], source=url)
+                logger.info("Adding url text to vectorstore")
+                vectorstore.add_documents(chunks)
+        except GoogleGenerativeAIError as e:
+                logger.exception("Google GenAI embedding failed during ingestion")
+                raise IngestionError(
+                    "Please check your Google Generative AI API key."
+                ) from e
+        except Exception as e:
+            logger.exception("Unexpected ingestion error while ingesting urls.")
+            raise IngestionError("Failed to add urls to vectorstore.") from e
+

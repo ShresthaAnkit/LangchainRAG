@@ -16,12 +16,17 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     VECTOR_DB: VectorDB = VectorDB.CHROMADB
-    LLM_PROVIDER: LLMProvider = LLMProvider.GOOGLE
-    EMBEDDING_PROVIDER: EmbeddingProvider = EmbeddingProvider.GOOGLE
-    EMBEDDING_MODEL_NAME: str = "gemini-embedding-001"
-    LLM_MODEL_NAME: str = "gemini-2.5-flash"
     VECTORDB_PERSIST_DIRECTORY: str = "./vectorstore"
     VECTORDB_PERSIST_URL: str = "http://localhost:6333"
+
+    EMBEDDING_PROVIDER: EmbeddingProvider = EmbeddingProvider.GOOGLE
+    EMBEDDING_MODEL_NAME: str = "gemini-embedding-001"
+    
+    LLM_PROVIDER: LLMProvider = LLMProvider.GOOGLE
+    LLM_MODEL_NAME: str = "gemini-2.5-flash"
+
+    TAVILY_API_KEY: str = ""
+    
     REDIS_URL: str = "redis://localhost:6379"
 
     GOOGLE_API_KEY: str = ""
