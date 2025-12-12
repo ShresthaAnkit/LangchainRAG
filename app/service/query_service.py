@@ -57,7 +57,7 @@ class QueryService:
         logger.info("Performing Vector Search")
         retriever = vectorstore.as_retriever(
             search_type="similarity",
-            search_kwargs={"k": 5, "score_threshold": 0.5},
+            search_kwargs={"k": 5, "score_threshold": 0.3},
         )
         docs = retriever.invoke(query, config={"callbacks": [langfuse_handler]})
         formatted_docs = []
