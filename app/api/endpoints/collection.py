@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from langchain_core.vectorstores import VectorStore
-from app.schema.query import ListCollectionResponse
+from app.schema.collection import ListCollectionResponse
 from app.api.deps import get_vectorstore_deps
 from app.schema.api import ApiResponse
 from app.core.logging_config import get_logger
