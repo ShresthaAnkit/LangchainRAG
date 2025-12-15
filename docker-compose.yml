@@ -1,9 +1,15 @@
 services:
   backend:
     build: .  
-    container_name: langchain-rag-backend
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     ports:
-      - "8001:8000"
+      - "8000:8000"
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     depends_on:
       - redis
@@ -11,15 +17,13 @@ services:
 
   redis:
     image: redis:latest
-    container_name: redis-langchain-rag
     ports:
-      - "6380:6379"
+      - "6379:6379"
 
   qdrant:
     image: qdrant/qdrant:latest
-    container_name: qdrant-langchain-rag
     ports:
-      - "6334:6333"
+      - "6333:6333"
     volumes:
       - qdrant_data:/qdrant/storage
 
