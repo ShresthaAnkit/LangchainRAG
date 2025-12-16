@@ -1,12 +1,12 @@
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from qdrant_client import QdrantClient
-import boto3
-from app.exception.collection import CollectionAlreadyExistsError
-from app.schema.db import VectorDB
+
+from app.exception import CollectionAlreadyExistsError, VectorDBError
 from app.schema.llm import EmbeddingProvider
-from app.core.logging_config import get_logger
-from app.exception import VectorDBError
+from app.schema.db import VectorDB
 from app.core.config import settings
+from app.core.logging_config import get_logger
+from app.core.llm import get_embedding_function
 
 logger = get_logger(__name__)
 
@@ -18,36 +18,6 @@ def get_session_history(session_id: str):
     return history
 
 
-def _get_embedding_function(embedding_provider: EmbeddingProvider, model_name: str):
-    if embedding_provider == EmbeddingProvider.GOOGLE:
-        from langchain_google_genai import GoogleGenerativeAIEmbeddings
-
-        embedding_function = GoogleGenerativeAIEmbeddings(
-            model=model_name,
-        )
-    elif embedding_provider == EmbeddingProvider.COHERE:
-        from langchain_cohere import CohereEmbeddings
-
-        embedding_function = CohereEmbeddings(
-            model=model_name,
-        )
-    elif embedding_provider == EmbeddingProvider.BEDROCK:
-        from langchain_aws import BedrockEmbeddings
-        bedrock_runtime = boto3.client(
-            service_name="bedrock-runtime",
-            region_name=settings.REGION_NAME
-        )
-
-        embedding_function = BedrockEmbeddings(
-            client=bedrock_runtime,
-            model_id=model_name
-        )
-    else:
-        logger.error(f"Embedding provider {embedding_provider} not supported")
-        raise VectorDBError(f"Unsupported embedding provider: {embedding_provider}")
-    return embedding_function
-
-
 def get_vectorstore(
     vector_db: VectorDB,
     embedding_provider: EmbeddingProvider,
@@ -57,7 +27,7 @@ def get_vectorstore(
     persist_url: str = None,
 ):
     try:
-        embedding_function = _get_embedding_function(
+        embedding_function = get_embedding_function(
             embedding_provider=embedding_provider, model_name=model_name
         )
 
@@ -87,7 +57,7 @@ def get_vectorstore(
 
 
 def create_collection_qdrant(collection_name: str) -> bool:
-    embedding_function = _get_embedding_function(
+    embedding_function = get_embedding_function(
         embedding_provider=settings.EMBEDDING_PROVIDER,
         model_name=settings.EMBEDDING_MODEL_NAME,
     )
