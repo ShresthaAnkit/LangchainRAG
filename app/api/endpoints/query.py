@@ -18,7 +18,7 @@ def chat(
 ):
     query_service = QueryService()
 
-    query_response = query_service.query(
+    query_response = query_service.query_agentic(
         query=request.query,
         session_id=request.session_id,
         llm=llm,
