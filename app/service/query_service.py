@@ -243,6 +243,9 @@ class QueryService:
             except Exception as e:
                 logger.error(f"Failed to parse sources from agent response: {e}")
                 sources = []
+
+            history_obj.add_user_message(query)
+            history_obj.add_ai_message(final_answer)
             return QueryResponse(answer=final_answer, sources=sources)
         except ValueError as e:
             raise QueryError(str(e)) from e
